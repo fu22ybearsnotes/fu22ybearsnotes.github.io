@@ -47,8 +47,26 @@ article { line-height: 1.7; font-size: 1.08rem; }
 .source-link { margin: 3rem 0 1.6em; text-align: right; }
 
 /* graph page */
-.graph-box { border: 1px solid var(--hairline); }
-.graph-box svg { display: block; width: 100%; height: auto; }
-.graph-box circle { fill: var(--link); }
-.graph-box line { stroke: var(--hairline); stroke-opacity: .9; }
+.graph-box { position: relative; border: 1px solid var(--hairline); }
+.graph-box svg { display: block; width: 100%; height: auto; user-select: none; }
+.graph-box .node { cursor: pointer; transition: opacity .15s; }
+.graph-box .edge { transition: opacity .15s; }
+.graph-box circle { fill: var(--link); stroke: var(--bg); stroke-width: 1.5px; }
+.graph-box line.vis { stroke: var(--link); stroke-opacity: .35; }
+.graph-box line.hit { stroke: #000; stroke-opacity: 0; stroke-width: 12; cursor: pointer; }
 .graph-box text { fill: var(--fg); font-family: system-ui, -apple-system, sans-serif; font-size: 11px; }
+.graph-box .node.faded, .graph-box .edge.faded { opacity: .12; }
+.graph-box .edge.active line.vis { stroke-opacity: 1; }
+.graph-box .node.active circle { stroke: var(--fg); }
+.graph-box .node.active text, .graph-box .node.neighbor text { font-weight: 650; }
+
+.graph-controls {
+  position: absolute; bottom: .5rem; right: .5rem; display: flex; flex-direction: column; gap: 4px;
+}
+.graph-controls button {
+  width: 1.8rem; height: 1.8rem; padding: 0; line-height: 1;
+  font: inherit; font-size: .95rem; color: var(--fg);
+  background: var(--bg); border: 1px solid var(--hairline); border-radius: 4px;
+  cursor: pointer; opacity: .85;
+}
+.graph-controls button:hover { border-color: var(--link); color: var(--link); opacity: 1; }
