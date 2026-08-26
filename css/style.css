@@ -23,7 +23,7 @@ header .site-title a { color: inherit; }
 .post-list { list-style: none; padding: 0; }
 .post-list li { margin: .45em 0; }
 .post-list li a { font-weight: 500; }
-.post-list li time { color: var(--muted); font-size: .85rem; margin-left: .5em; font-variant-numeric: tabular-nums; }
+.post-list li time { color: var(--muted); font-size: .85rem; margin-right: .5em; font-variant-numeric: tabular-nums; }
 .part { color: var(--muted); font-size: .85rem; }
 
 /* site nav: minimal horizontal menu under the site title, plus footer copy.

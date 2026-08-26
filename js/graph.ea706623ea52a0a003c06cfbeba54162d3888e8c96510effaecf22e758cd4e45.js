@@ -1,8 +1,11 @@
 /* Graph page (/graph/): renders graph.json (built at Hugo build time from
-   related: edges only) with a vendored d3 force layout. No CDN.
+   related: edges + intra-series chain edges) with a vendored d3 force layout.
+   No CDN.
    - node radius  ~ weighted degree (mutual relations count double)
    - link width   ~ weight (directional duplicates merged into one undirected
                     edge; if both posts name each other, weight = 2)
+   - series edges (kind "series", chaining a series' parts) render dashed
+     1px regardless of weight
    - stronger links pull nodes closer together (link strength/distance)
    - zoom/pan: wheel + drag-pan + on-screen buttons
    - click node: highlights the node, its edges and neighbours (dblclick opens post)
@@ -20,8 +23,8 @@
     if (l.source === l.target) continue;
     const key = [l.source, l.target].sort().join('');
     const e = byPair.get(key);
-    if (e) e.weight += 1;
-    else byPair.set(key, { source: l.source, target: l.target, weight: 1 });
+    if (e) { e.weight += 1; if (l.kind === 'related') e.kind = 'related'; }
+    else byPair.set(key, { source: l.source, target: l.target, weight: 1, kind: l.kind || 'related' });
   }
   const links = [...byPair.values()];
 
@@ -34,7 +37,7 @@
   for (const l of links) { adj.get(l.source).add(l.target); adj.get(l.target).add(l.source); }
 
   const radius = d => 5 + 2.5 * Math.sqrt(deg.get(d.id) || 0);
-  const linkWidth = l => 1 + 1.2 * l.weight;
+  const linkWidth = l => l.kind === 'series' ? 1 : 1 + 1.2 * l.weight;
 
   const svg = d3.select(svgEl);
   const W = 800, H = 560;
@@ -52,7 +55,8 @@
     .selectAll('g.edge').data(links).join('g').attr('class', 'edge');
   edge.append('line').attr('class', 'hit');
   edge.append('line').attr('class', 'vis')
-    .attr('stroke-width', linkWidth);
+    .attr('stroke-width', linkWidth)
+    .attr('stroke-dasharray', l => l.kind === 'series' ? '4 3' : null);
 
   const node = viewport.append('g')
     .selectAll('g.node').data(nodes).join('g').attr('class', 'node');
