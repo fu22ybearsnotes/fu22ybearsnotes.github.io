@@ -17,7 +17,7 @@ a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 /* index */
-header .site-title { font-size: 1.5rem; letter-spacing: -.01em; margin: 0 0 .6rem; font-weight: 650; }
+header .site-title { font-size: 1.5rem; letter-spacing: -.01em; margin: 0 0 1.2rem; font-weight: 650; }
 header .site-title a { color: inherit; }
 .year-h { font-size: .8rem; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; margin: 2.2em 0 .6em; font-weight: 500; }
 .post-list { list-style: none; padding: 0; }
@@ -35,7 +35,7 @@ header .site-title a { color: inherit; }
 .page-foot .site-nav { margin-bottom: 0; }
 
 /* post */
-.back { font-size: .9rem; color: var(--muted); display: inline-block; margin-bottom: .6rem; }
+.back { font-size: .9rem; color: var(--muted); display: inline-block; margin-bottom: 1.2rem; }
 .eyebrow { color: var(--muted); font-size: .85rem; letter-spacing: .1em; text-transform: uppercase; margin-bottom: .4rem; }
 article > h1 { font-size: 2rem; line-height: 1.2; letter-spacing: -.02em; margin: 0 0 2.2rem; font-weight: 700; }
 article h2 { font-size: 1.15rem; margin: 2.2em 0 .8em; font-weight: 650; }

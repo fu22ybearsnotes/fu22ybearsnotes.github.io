@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>астеризм большой медведицы</title>
+  <style>
+    .l{fill:none;stroke:#1c1c1e;stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+    .d{fill:#1c1c1e;stroke:none}
+    @media (prefers-color-scheme:dark){
+      .l{stroke:#d8dadf}
+      .d{fill:#d8dadf}
+    }
+  </style>
+  <!-- ART:start -->
+  <!-- координаты: реальная карта неба X=(RA-11h)*8.3, Y=Dec, повёрнута на 165°
+       против часовой (заходящий ковш, летний вечер; хиральность истинная —
+       зеркала нет), лёгкое вертикальное растяжение к квадрату; Бенетнаш
+       сверху слева, чаша справа снизу; указатели Мерак→Дубхе смотрят на
+       Полярную (нижний край иконки) -->
+  <path class="l" d="M80 88 L85.8 66.2 L63.3 47.1 L50.4 57.7 L80 88"/>
+  <path class="l" d="M50.4 57.7 L33 47.4 L19.8 38.6 L14.2 12"/>
+  <g class="d">
+    <circle cx="80"   cy="88"   r="7"/>
+    <circle cx="85.8" cy="66.2" r="7"/>
+    <circle cx="63.3" cy="47.1" r="7"/>
+    <circle cx="50.4" cy="57.7" r="7"/>
+    <circle cx="33"   cy="47.4" r="7"/>
+    <circle cx="19.8" cy="38.6" r="7"/>
+    <circle cx="14.2" cy="12"   r="7"/>
+  </g>
+  <!-- ART:end -->
+</svg>
