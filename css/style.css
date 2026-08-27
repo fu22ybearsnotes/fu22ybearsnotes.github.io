@@ -25,6 +25,7 @@ header .site-title a { color: inherit; }
 .post-list li a { font-weight: 500; }
 .post-list li time { color: var(--muted); font-size: .85rem; margin-right: .5em; font-variant-numeric: tabular-nums; }
 .part { color: var(--muted); font-size: .85rem; }
+.tags { color: var(--muted); font-size: .85rem; }
 
 /* site nav: minimal horizontal menu under the site title, plus footer copy.
    Both copies are framed by hairlines above and below. */
@@ -37,6 +38,7 @@ header .site-title a { color: inherit; }
 /* post */
 .back { font-size: .9rem; color: var(--muted); display: inline-block; margin-bottom: 1.2rem; }
 .eyebrow { color: var(--muted); font-size: .85rem; letter-spacing: .1em; text-transform: uppercase; margin-bottom: .4rem; }
+.post-tags { color: var(--muted); font-size: .9rem; margin: 0 0 .4rem; }
 article > h1 { font-size: 2rem; line-height: 1.2; letter-spacing: -.02em; margin: 0 0 2.2rem; font-weight: 700; }
 article h2 { font-size: 1.15rem; margin: 2.2em 0 .8em; font-weight: 650; }
 article blockquote { margin: 1.4em 0; padding-left: 1.1em; border-left: 2px solid var(--quote-border); color: var(--quote-fg); font-style: normal; }
