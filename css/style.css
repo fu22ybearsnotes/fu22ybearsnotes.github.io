@@ -24,6 +24,7 @@ header .site-title a { color: inherit; }
 .post-list li { margin: .45em 0; }
 .post-list li a { font-weight: 500; }
 .post-list li time { color: var(--muted); font-size: .85rem; margin-right: .5em; font-variant-numeric: tabular-nums; }
+.genre { color: var(--muted); border: 1px solid var(--hairline); border-radius: 2px; font-size: .75rem; padding: .05em .3em; }
 .part { color: var(--muted); font-size: .85rem; }
 .tags { color: var(--muted); font-size: .85rem; }
 
