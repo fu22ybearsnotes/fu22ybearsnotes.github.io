@@ -262,7 +262,7 @@
     const selectedNode = state.selection.nodeId;
     const selectedEdge = state.selection.edgeId;
     const selectedLink = selectedEdge ? state.graph.links.find(link => edgeId(link) === selectedEdge) : null;
-    const selectionScope = GraphSelection.resolve(state.selection, state.graph);
+    const selectionScope = GraphSelection.resolve(state.selection, state.graph, edgeId);
     const hasSelection = !!state.selection.type;
     const spotlight = state.search.query.trim();
     const matches = new Set(state.search.matchIds);
