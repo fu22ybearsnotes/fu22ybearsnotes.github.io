@@ -70,11 +70,11 @@ article { line-height: 1.7; font-size: 1.08rem; }
 .graph-box .edge .hit { stroke: transparent; stroke-width: 14px; cursor: pointer; }
 .graph-box text { fill: var(--fg); font-family: system-ui, -apple-system, sans-serif; font-size: 11px; pointer-events: none; transition: opacity .15s; }
 .graph-box .node.hidden, .graph-box .edge.hidden { display: none; }
-.graph-box .node.search-dimmed, .graph-box .edge.search-dimmed { opacity: .16; }
+.graph-box .node.search-dimmed, .graph-box .edge.search-dimmed, .graph-box .node.selection-dimmed, .graph-box .edge.selection-dimmed { opacity: .16; }
 .graph-box .node.hover-dimmed, .graph-box .edge.hover-dimmed { opacity: .24; }
-.graph-box .node.neighbour circle, .graph-box .edge-pinned .vis, .graph-box .edge.pinned .vis { stroke-opacity: 1; opacity: 1; }
+.graph-box .node.neighbour circle, .graph-box .edge-pinned .vis, .graph-box .edge.incident .vis, .graph-box .edge.pinned .vis { stroke-opacity: 1; opacity: 1; }
 .graph-box .node.isolate { opacity: .62; }
-.graph-box .node.pinned, .graph-box .node.edge-pinned, .graph-box .edge.pinned { opacity: 1; }
+.graph-box .node.pinned, .graph-box .node.edge-pinned, .graph-box .edge.incident, .graph-box .edge.pinned { opacity: 1; }
 .graph-box .node:focus-visible circle, .graph-box .edge:focus-visible .vis { outline: none; stroke: var(--fg); stroke-width: 3px; }
 .graph-controls { position: absolute; right: .5rem; bottom: .5rem; display: flex; gap: 4px; z-index: 3; }
 .graph-controls button { width: 1.9rem; height: 1.9rem; padding: 0; line-height: 1; font-size: 1rem; color: var(--fg); background: var(--bg); border: 1px solid var(--hairline); border-radius: 4px; cursor: pointer; }

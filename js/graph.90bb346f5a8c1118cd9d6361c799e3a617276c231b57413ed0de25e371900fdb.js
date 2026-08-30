@@ -243,10 +243,10 @@
     nodeSel.attr('transform', node => `translate(${node.x},${node.y})`);
   }
 
-  function labelOpacity(node) {
+  function labelOpacity(node, selectionScope) {
     const ratio = state.camera.transform.k / state.camera.fitScale;
     const selected = state.selection.nodeId;
-    if (node.id === selected || state.hover.id === node.id || (selected && state.graph.adjacency.get(selected).has(node.id))) return 1;
+    if (selectionScope.nodeIds.has(node.id) || state.hover.id === node.id || (selected && state.graph.adjacency.get(selected).has(node.id))) return 1;
     const hub = node.hubLabel || node.isolate;
     if (hub) return Math.max(0, Math.min(1, (ratio - 1) / .6));
     const threshold = 10 / 11;
@@ -262,6 +262,8 @@
     const selectedNode = state.selection.nodeId;
     const selectedEdge = state.selection.edgeId;
     const selectedLink = selectedEdge ? state.graph.links.find(link => edgeId(link) === selectedEdge) : null;
+    const selectionScope = GraphSelection.resolve(state.selection, state.graph);
+    const hasSelection = !!state.selection.type;
     const spotlight = state.search.query.trim();
     const matches = new Set(state.search.matchIds);
     const hoverNode = state.hover.type === 'node' ? state.hover.id : null;
@@ -271,13 +273,16 @@
       .classed('pinned', node => node.id === selectedNode)
       .classed('edge-pinned', node => !!selectedLink && (selectedLink.sourceId === node.id || selectedLink.targetId === node.id))
       .classed('neighbour', node => neighbourIds.has(node.id))
-      .classed('search-dimmed', node => !!spotlight && state.visibleNodeIds.has(node.id) && !matches.has(node.id))
-      .classed('hover-dimmed', node => !state.selection.type && !!hoverNode && state.visibleNodeIds.has(node.id) && node.id !== hoverNode && !neighbourIds.has(node.id));
+      .classed('selection-dimmed', node => hasSelection && state.visibleNodeIds.has(node.id) && !selectionScope.nodeIds.has(node.id))
+      .classed('search-dimmed', node => !!spotlight && state.visibleNodeIds.has(node.id) && !matches.has(node.id) && !selectionScope.nodeIds.has(node.id))
+      .classed('hover-dimmed', node => !hasSelection && !!hoverNode && state.visibleNodeIds.has(node.id) && node.id !== hoverNode && !neighbourIds.has(node.id));
     edgeSel.classed('hidden', link => !state.visibleNodeIds.has(link.sourceId) || !state.visibleNodeIds.has(link.targetId))
       .classed('pinned', link => edgeId(link) === selectedEdge)
-      .classed('search-dimmed', link => !!spotlight && (!matches.has(link.sourceId) || !matches.has(link.targetId)))
-      .classed('hover-dimmed', link => !state.selection.type && !!hoverNode && link.sourceId !== hoverNode && link.targetId !== hoverNode);
-    nodeSel.select('text').style('opacity', labelOpacity);
+      .classed('incident', link => selectionScope.edgeIds.has(edgeId(link)))
+      .classed('selection-dimmed', link => hasSelection && !selectionScope.edgeIds.has(edgeId(link)))
+      .classed('search-dimmed', link => !!spotlight && (!matches.has(link.sourceId) || !matches.has(link.targetId)) && !selectionScope.edgeIds.has(edgeId(link)))
+      .classed('hover-dimmed', link => !hasSelection && !!hoverNode && link.sourceId !== hoverNode && link.targetId !== hoverNode);
+    nodeSel.select('text').style('opacity', node => labelOpacity(node, selectionScope));
     renderTooltip();
   }
 
