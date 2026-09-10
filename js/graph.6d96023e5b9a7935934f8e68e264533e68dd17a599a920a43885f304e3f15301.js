@@ -29,7 +29,7 @@
     if (!match) return null;
     return { stem: match[2], part: match[1], sort: match[1].split('-').map(Number) };
   };
-  const pairKey = (a, b) => JSON.stringify([a, b].sort());
+  const pairKey = GraphEdge.pairKey;
   const dateValue = node => Number.isFinite(Date.parse(node.date)) ? Date.parse(node.date) : 0;
   const nodeYear = node => {
     const value = new Date(node.date).getFullYear();
@@ -46,22 +46,11 @@
       const node = { ...raw, tags: Array.isArray(raw.tags) ? raw.tags.map(String) : [], series: parseSeries(raw.id), relatedDegree: 0, layoutDegree: 0 };
       nodeById.set(node.id, node);
     });
-    const pairs = new Map();
-    data.links.forEach(raw => {
-      if (!raw || typeof raw.source !== 'string' || typeof raw.target !== 'string' || raw.source === raw.target || !nodeById.has(raw.source) || !nodeById.has(raw.target)) return;
-      const key = pairKey(raw.source, raw.target);
-      let link = pairs.get(key);
-      if (!link) {
-        link = { sourceId: raw.source, targetId: raw.target, relatedWeight: 0, seriesWeight: 0, weight: 0, renderKind: 'series' };
-        pairs.set(key, link);
-      }
-      if (raw.kind === 'series') link.seriesWeight += 1;
-      else link.relatedWeight += 1;
-    });
-    const links = [...pairs.values()];
+    // Edge metadata normalization and related+series merging live in the pure
+    // GraphEdge seam (src/assets/js/graph-edge.js); description travels only
+    // with the related ground.
+    const links = GraphEdge.mergeLinks(data.links, id => nodeById.has(id));
     links.forEach(link => {
-      link.weight = link.relatedWeight + link.seriesWeight;
-      link.renderKind = link.relatedWeight ? 'related' : 'series';
       const source = nodeById.get(link.sourceId), target = nodeById.get(link.targetId);
       source.layoutDegree += 1;
       target.layoutDegree += 1;
@@ -381,8 +370,8 @@
     renderPanel(); renderState();
   }
   function pinEdge(id) {
-    state.selection = { type: 'edge', nodeId: null, edgeId: id, panelOpen: false };
-    panelEl.hidden = true; renderState();
+    state.selection = { type: 'edge', nodeId: null, edgeId: id, panelOpen: true };
+    renderPanel(); renderState();
   }
   function clearSelection() {
     state.selection = { type: null, nodeId: null, edgeId: null, panelOpen: false };
@@ -393,10 +382,26 @@
   function selectTravel(id) { if (state.visibleNodeIds.has(id)) { pinNode(id); centerOnNode(state.graph.nodeById.get(id)); } }
   function renderPanel() {
     panelEl.replaceChildren();
-    if (!state.selection.panelOpen || !state.selection.nodeId) { panelEl.hidden = true; return; }
+    if (!state.selection.panelOpen) { panelEl.hidden = true; return; }
+    if (state.selection.type === 'edge') {
+      const link = state.selection.edgeId ? state.graph.links.find(edge => edgeId(edge) === state.selection.edgeId) : null;
+      if (!link) { panelEl.hidden = true; return; }
+      const detail = GraphEdge.edgeDetail(link, state.graph.nodeById);
+      panelEl.hidden = false;
+      panelEl.setAttribute('aria-label', 'выбранная связь');
+      const close = document.createElement('button'); close.type = 'button'; close.className = 'panel-close'; close.textContent = 'закрыть'; close.addEventListener('click', () => clearSelection()); panelEl.append(close);
+      detail.labels.forEach((label, index) => addText(panelEl, index === 0 ? 'h2' : 'p', label));
+      const list = document.createElement('ul');
+      detail.endpoints.forEach(node => { const item = document.createElement('li'), read = document.createElement('a'); read.href = node.url; read.textContent = node.title; item.append(read); list.append(item); });
+      panelEl.append(list);
+      if (detail.description) addText(panelEl, 'p', detail.description);
+      return;
+    }
+    if (!state.selection.nodeId) { panelEl.hidden = true; return; }
     const node = state.graph.nodeById.get(state.selection.nodeId);
     panelEl.hidden = false;
-    const close = document.createElement('button'); close.type = 'button'; close.className = 'panel-close'; close.textContent = 'закрыть'; close.addEventListener('click', () => { state.selection.panelOpen = false; renderPanel(); }); panelEl.append(close);
+    panelEl.setAttribute('aria-label', 'выбранная заметка');
+    const close = document.createElement('button'); close.type = 'button'; close.className = 'panel-close'; close.textContent = 'закрыть'; close.addEventListener('click', () => clearSelection()); panelEl.append(close);
     addText(panelEl, 'h2', node.title); addText(panelEl, 'p', new Date(node.date).toLocaleDateString('ru-RU'));
     if (node.series) addText(panelEl, 'p', `серия «${node.series.stem}», часть ${node.series.part.replace('-', '.')}`);
     const related = [...state.graph.relatedNeighbours.get(node.id)].map(id => state.graph.nodeById.get(id)).sort((a, b) => dateValue(b) - dateValue(a));
@@ -436,7 +441,8 @@
   function handleEscape() {
     if (state.filters.popoverOpen) { state.filters.popoverOpen = false; filtersEl.hidden = true; filterButton.setAttribute('aria-expanded', 'false'); return; }
     if (state.search.open || state.search.query) { state.search.open = false; state.search.query = ''; searchInput.value = ''; resultsEl.hidden = true; searchInput.setAttribute('aria-expanded', 'false'); updateSearch(); return; }
-    if (state.selection.panelOpen) { state.selection.panelOpen = false; renderPanel(); return; }
+    // Closing the shared panel clears the selection: panel and graph state
+    // never diverge (one Escape both closes the panel and clears selection).
     if (state.selection.type) clearSelection();
   }
 
