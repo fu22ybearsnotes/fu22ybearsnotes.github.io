@@ -33,6 +33,9 @@ header .site-title a { color: inherit; }
 .site-nav { font-size: .9rem; color: var(--muted); margin: 0 0 2.2rem; padding: .55rem 0; border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); }
 .site-nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 1.25em; }
 .site-nav .cur { color: var(--muted); }
+.site-nav .tg { margin-left: auto; }
+.site-nav .tg a { display: inline-flex; align-items: center; gap: .35em; }
+.site-nav .tg svg { width: 1em; height: 1em; fill: currentColor; }
 .page-foot { margin-top: 4rem; color: var(--muted); }
 .page-foot .site-nav { margin-bottom: 0; }
 
