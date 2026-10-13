@@ -23,6 +23,12 @@
   };
   let svg, viewport, nodeSel, edgeSel, zoom, simulation, resizeObserver, settled = false;
 
+  // Observe activity before fetch resolves; late initialization must not steal focus.
+  let interactedWhileLoading = document.activeElement !== document.body && document.activeElement !== document.documentElement;
+  const pendingInteraction = new AbortController();
+  ['pointerdown', 'keydown', 'focusin', 'wheel'].forEach(type => document.addEventListener(type, () => { interactedWhileLoading = true; }, { capture: true, passive: true, signal: pendingInteraction.signal }));
+  window.addEventListener('hashchange', () => { if (settled) applyAddressTarget(true); });
+
   const setStatus = text => { statusEl.textContent = text; };
   const parseSeries = id => {
     const match = /^(\d+(?:-\d+)*)-n-(.+)$/.exec(id);
@@ -180,7 +186,7 @@
     parkIsolates();
     renderGeometry();
     setZoomBounds();
-    fitToVisible(true);
+    fitToVisible(false);
     simulation.stop();
     settled = true;
   }
@@ -219,11 +225,48 @@
     target.call(zoom.transform, transform);
   }
 
-  function centerOnNode(node) {
+  function centerOnNode(node, addressEntry = false) {
     if (!node || !state.visibleNodeIds.has(node.id)) return;
     const targetScale = Math.max(state.camera.transform.k, state.camera.fitScale * 1.6);
-    const transform = d3.zoomIdentity.translate(state.size.width / 2 - node.x * targetScale, state.size.height / 2 - node.y * targetScale).scale(targetScale);
-    svg.transition().duration(300).call(zoom.transform, transform);
+    let width = state.size.width, height = state.size.height;
+    if (addressEntry && !panelEl.hidden) {
+      const graphRect = svgEl.getBoundingClientRect(), panelRect = panelEl.getBoundingClientRect();
+      if (window.matchMedia('(max-width: 520px)').matches) height = Math.max(1, panelRect.top - graphRect.top);
+      else width = Math.max(1, panelRect.left - graphRect.left);
+    }
+    const transform = d3.zoomIdentity.translate(width / 2 - node.x * targetScale, height / 2 - node.y * targetScale).scale(targetScale);
+    svg.interrupt();
+    const target = addressEntry && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? svg : svg.transition().duration(300);
+    target.call(zoom.transform, transform);
+  }
+
+  function applyAddressTarget(focusTarget) {
+    const target = GraphEntry.resolve(window.location.hash, state.graph.nodeById);
+    // A removed target preserves the camera at its current transform, even mid-transition.
+    svg.interrupt();
+    state.hover = { type: null, id: null };
+    clearSelection();
+    if (target.type === 'absent') {
+      setStatus(`${state.graph.nodes.length} заметок, ${state.graph.links.length} связей`);
+      return;
+    }
+    state.filters.popoverOpen = false; filtersEl.hidden = true; filterButton.setAttribute('aria-expanded', 'false');
+    searchInput.value = ''; updateSearch(); resetFilters();
+    if (target.type === 'invalid') {
+      fitToVisible(false);
+      setStatus('Пост не найден на графе');
+      return;
+    }
+    const node = state.graph.nodeById.get(target.id);
+    pinNode(node.id);
+    // Suppress automatic resize-refit, while leaving all manual camera controls active.
+    state.camera.userInteracted = true;
+    centerOnNode(node, true);
+    setStatus(`Выбрано: ${node.title}`);
+    if (focusTarget) {
+      svgEl.scrollIntoView({ block: 'center', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+      nodeSel.filter(item => item.id === node.id).node().focus({ preventScroll: true });
+    }
   }
 
   function renderGeometry() {
@@ -506,6 +549,8 @@
     state.graph = graph; state.visibleNodeIds = new Set(graph.nodes.map(node => node.id));
     const rect = box.getBoundingClientRect(); state.size = { width: Math.round(rect.width), height: Math.round(rect.height) };
     svgEl.setAttribute('width', state.size.width); svgEl.setAttribute('height', state.size.height);
-    measureLabels(); buildGraph(); makeSimulation(); settleLayout(); bindEvents(); bindResize(); renderFilterPopover(); setStatus(`${graph.nodes.length} заметок, ${graph.links.length} связей`);
-  }).catch(error => { setStatus(`граф недоступен: ${error.message}`); });
+    measureLabels(); buildGraph(); makeSimulation(); settleLayout(); bindEvents(); bindResize(); renderFilterPopover();
+    pendingInteraction.abort();
+    applyAddressTarget(!interactedWhileLoading);
+  }).catch(error => { pendingInteraction.abort(); setStatus(`граф недоступен: ${error.message}`); });
 })();
